@@ -3,6 +3,14 @@
 // Create the Joystick
 Joystick_ Joystick;
 
+
+#define XAXIS              A0
+
+#define YAXIS              A1
+#define REVERSEBUTTON      9
+
+#define HS_XAXIS_56        600
+#define HS_YAXIS_135       800
 // H-shifter mode analog axis thresholds
 #define HS_XAXIS_12        400
 #define HS_XAXIS_56        600
@@ -63,10 +71,10 @@ int gear=0;                          // Default value is neutral
 
 void setup() {
    // G29 shifter analog inputs configuration 
-  pinMode(A0, INPUT_PULLUP);   // X axis
-  pinMode(A2, INPUT_PULLUP);   // Y axis
+  pinMode(XAXIS, INPUT_PULLUP);   // X axis
+  pinMode(YAXIS, INPUT_PULLUP);   // Y axis
 
-  pinMode(2, INPUT); 
+  pinMode(REVERSEBUTTON, INPUT); 
 
 
   for(int i=0; i<16; i++) b[i] = 0;
@@ -80,52 +88,44 @@ void setup() {
 int lastButtonState = 0;
 
 void loop() {
+  int c = 0;
+  int x=analogRead(XAXIS);                 // X axis
+  int y=analogRead(YAXIS);                 // Y axis
 
-  int x=analogRead(0);                 // X axis
-  int y=analogRead(2);                 // Y axis
-
-  int _isreverse = digitalRead(2);
+  int _isreverse = digitalRead(REVERSEBUTTON);
   int _gear_ = 0;
 
-if( _isreverse == 1 ){
 
-      _gear_ = 8;
-      b[DI_REVERSE]= 1;
 
-}else{ 
-  
 
-  if(b[DI_MODE]==0)                    // H-shifter mode?
+
+if(b[DI_MODE]==0)                    // H-shifter mode?
+{
+  if(x<HS_XAXIS_12)                  // Shifter on the left?
   {
-    if(x<HS_XAXIS_12)                  // Shifter on the left?
-    {
-      if(y>HS_YAXIS_135) _gear_=1;       // 1st gear
-      if(y<HS_YAXIS_246) _gear_=2;       // 2nd gear
-    }
-    else if(x>HS_XAXIS_56)             // Shifter on the right?
-    {
-      if(y>HS_YAXIS_135) _gear_=5;       // 5th gear
-      if(y<HS_YAXIS_246) _gear_=6;       // 6th gear
-     
-    }
-    else                               // Shifter is in the middle
-    {
-      if(y>HS_YAXIS_135) _gear_=3;       // 3rd gear
-      if(y<HS_YAXIS_246) _gear_=4;       // 4th gear
-    }
-   
+    if(y>HS_YAXIS_135) _gear_=1;       // 1st gear
+    if(y<HS_YAXIS_246) _gear_=2;       // 2nd gear
   }
-
+  else if(x>HS_XAXIS_56)             // Shifter on the right?
+  {
+    if(y>HS_YAXIS_135) _gear_=5;       // 5th gear
+    if(y<HS_YAXIS_246) _gear_=6;       // 6th gear
+    
+  }
+  else                               // Shifter is in the middle
+  {
+    if(y>HS_YAXIS_135) _gear_=3;       // 3rd gear
+    if(y<HS_YAXIS_246) _gear_=4;       // 4th gear
+  }
+  
 }
-  
-  
-  if(gear!=6) b[DI_REVERSE]=0;         // Reverse gear is allowed only on 6th gear position
-  
-   if (_gear_ != gear ){
-      gear = _gear_;
-      desactivar();
-      Joystick.setButton(gear-1, HIGH);
-   }
+
+  if(_gear_==6 && _isreverse) _gear_ = 8;         // Reverse gear is allowed only on 6th gear position
+  if (_gear_ != gear ){
+    gear = _gear_;
+    desactivar();
+    Joystick.setButton(gear-1, HIGH);
+  }
    delay(50);
 }
 
