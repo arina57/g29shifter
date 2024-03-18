@@ -6,8 +6,8 @@ Joystick_ Joystick;
 
 #define XAXIS              A0
 
-#define YAXIS              A1
-#define REVERSEBUTTON      9
+#define YAXIS              A2
+#define REVERSEBUTTON      10
 
 #define HS_XAXIS_56        600
 #define HS_YAXIS_135       800
